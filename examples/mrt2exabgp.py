@@ -132,6 +132,9 @@ def parse_args():
     p.add_argument(
         '-c', type=str, nargs='?', metavar='COMMUNITY', dest='community',
         help='adds this BGP community to the BGP community field')
+    p.add_argument(
+        '-ownasn', type=str, nargs='?', metavar='ASN', dest='asn',
+        help='adds own asn as the last ASN')
 
     if re.search('^-', sys.argv[-1]): 
         r = p.parse_args()
@@ -417,6 +420,8 @@ def get_bgp_attr(args, params, m, attr):
                 as_path += '(%s) ' % ' '.join(path_seg['value'])
             else:
                 as_path += '%s ' % ' '.join(path_seg['value'])
+        if args.asn:
+            as_path = args.asn + ' ' + as_path
         line += ' as-path [%s]' % as_path
 
     elif attr_t == BGP_ATTR_T['NEXT_HOP']:
@@ -440,7 +445,7 @@ def get_bgp_attr(args, params, m, attr):
 
         comm = ' '.join(attr['value'])
         if args.community:
-            comm = comm + ' ' + args.community
+            comm = args.community + ' ' + comm
         line += ' community [%s]' % comm
 
     elif attr_t == BGP_ATTR_T['ORIGINATOR_ID']:
