@@ -129,6 +129,9 @@ def parse_args():
     p.add_argument(
         '-P', action='store_false',
         help='convert to ExaBGP API program')
+    p.add_argument(
+        '-c', type=str, nargs='?', metavar='COMMUNITY', dest='community',
+        help='adds this BGP community to the BGP community field')
 
     if re.search('^-', sys.argv[-1]): 
         r = p.parse_args()
@@ -433,7 +436,11 @@ def get_bgp_attr(args, params, m, attr):
         line += ' aggregator (%s:%s)' % (str(asn), attr['value']['id'])
 
     elif attr_t == BGP_ATTR_T['COMMUNITY']:
+        params['next_hop'] = args.next_hop if args.next_hop else attr['value']
+
         comm = ' '.join(attr['value'])
+        if args.community:
+            comm = comm + ' ' + args.community
         line += ' community [%s]' % comm
 
     elif attr_t == BGP_ATTR_T['ORIGINATOR_ID']:
